@@ -85,6 +85,8 @@ function getChat(){
       success: function(response){
         response = '['+response+']';
         response = $.parseJSON(response);
+        var notification_username = '';
+        var notification_text = '';
         if(response.length > 0){
           newHTML = '';
           $.each(response,function(i,resp){
@@ -96,10 +98,16 @@ function getChat(){
                 newHTML += outPut;
                 cacheHTML = outPut;
 
+                notification_username = resp.username;
+                notification_text = resp.text;
+
             } else {
                 outPut = '<div class="chat_msg_item chat_msg_item_user" title="'+resp.date+'"><div class="chat_avatar">' + resp_img + '</div>' + resp.text +' @'+ resp.username + '</div>';
                 newHTML += outPut;
                 cacheHTML = outPut;
+
+                notification_username = resp.username;
+                notification_text = resp.text;
 
             }
           });
@@ -109,6 +117,7 @@ function getChat(){
             if(pageLoad){
               $('#chat_converse').append(cacheHTML);
             } else {
+              if(notification_username != readCookie('fab_chat_username')) notification(notification_username,notification_text);
               $('#chat_converse').html(oldHTML);
             }
             //loadBeat(true);
@@ -438,6 +447,27 @@ function validateEmail(email) {
     return false;
   } else {
     return true;
+  }
+}
+
+function notification(title,msg) {
+  document.addEventListener('DOMContentLoaded', function () {
+    if (Notification.permission !== "granted")
+        Notification.requestPermission();
+    });
+
+    if (!Notification) {
+        alert('Desktop notifications not available in your browser. Try Chromium.');
+        return;
+    }
+
+  if (Notification.permission !== "granted")
+      Notification.requestPermission();
+  else {
+      var notification = new Notification(title, {
+        icon: window.location.pathname+'/img/paw.png',
+        body: msg,
+      });
   }
 }
 
